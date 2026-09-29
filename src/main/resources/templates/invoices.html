@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Invoices & Vendor Bills</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+    <a class="navbar-brand fw-bold" href="/">🚁 Drone Port Hub</a>
+    <div class="navbar-nav">
+        <a class="nav-link" href="/">Home</a>
+        <a class="nav-link" href="/pads">Landing Pads</a>
+        <a class="nav-link" href="/dockings">Docking & Flights</a>
+        <a class="nav-link active" href="/invoices">Billing & Invoices</a>
+        <a class="nav-link" href="/reports">Financial Reports</a>
+    </div>
+</nav>
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card p-3 shadow-sm">
+                <h5 class="fw-bold">Record Maintenance Bill</h5>
+                <form th:action="@{/invoices/add-bill}" th:object="${newBill}" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Bill / PO Number</label>
+                        <input type="text" class="form-control" th:field="*{invoiceNumber}" placeholder="e.g. BILL-9921" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Vendor</label>
+                        <select class="form-select" th:field="*{operator.id}">
+                            <option th:each="v : ${vendors}" th:value="${v.id}" th:text="${v.name}"></option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Service Description</label>
+                        <input type="text" class="form-control" th:field="*{description}" placeholder="e.g. Radar Calibration" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Total Amount ($)</label>
+                        <input type="number" step="0.01" class="form-control" th:field="*{amount}" placeholder="150.0" required>
+                    </div>
+                    <button type="submit" class="btn btn-warning w-100">Add Maintenance Bill</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card p-3 shadow-sm">
+                <h5 class="fw-bold">Financial Ledgers (Invoices & Bills)</h5>
+                <table class="table table-hover mt-3">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Number</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="inv : ${invoices}">
+                        <td class="fw-bold" th:text="${inv.invoiceNumber}"></td>
+                        <td>
+                            <span class="badge" th:classappend="${inv.type == 'CUSTOMER_INVOICE' ? 'bg-success' : 'bg-secondary'}" th:text="${inv.type}"></span>
+                        </td>
+                        <td th:text="${inv.description}"></td>
+                        <td th:text="'$' + ${inv.amount}"></td>
+                        <td>
+                            <span class="badge" th:classappend="${inv.paymentStatus == 'PAID' ? 'bg-success' : 'bg-danger'}" th:text="${inv.paymentStatus}"></span>
+                        </td>
+                        <td>
+                            <a th:if="${inv.paymentStatus == 'PENDING'}" th:href="@{'/invoices/pay/' + ${inv.id}}" class="btn btn-sm btn-outline-success">Mark Paid</a>
+                            <span th:if="${inv.paymentStatus == 'PAID'}" class="text-muted">Settled</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

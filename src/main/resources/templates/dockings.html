@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Docking Operations</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+    <a class="navbar-brand fw-bold" href="/">🚁 Drone Port Hub</a>
+    <div class="navbar-nav">
+        <a class="nav-link" href="/">Home</a>
+        <a class="nav-link" href="/pads">Landing Pads</a>
+        <a class="nav-link active" href="/dockings">Docking & Flights</a>
+        <a class="nav-link" href="/invoices">Billing & Invoices</a>
+        <a class="nav-link" href="/reports">Financial Reports</a>
+    </div>
+</nav>
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card p-3 shadow-sm">
+                <h5 class="fw-bold">Record Landing (Telemetry)</h5>
+                <form th:action="@{/dockings/land}" th:object="${newDocking}" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Drone Identifier</label>
+                        <input type="text" class="form-control" th:field="*{droneIdentifier}" placeholder="e.g. SKY-782" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Drone Operator</label>
+                        <select class="form-select" th:field="*{operator.id}">
+                            <option th:each="op : ${operators}" th:value="${op.id}" th:text="${op.name}"></option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Available Landing Pad</label>
+                        <select class="form-select" th:field="*{dronePad.id}">
+                            <option th:each="pad : ${pads}" th:value="${pad.id}" th:text="${pad.padCode + ' ($' + pad.hourlyRate + '/hr)'}"></option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Land Drone</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card p-3 shadow-sm">
+                <h5 class="fw-bold">Docking Events & Air Corridor Log</h5>
+                <table class="table table-hover mt-3">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Drone</th>
+                        <th>Pad</th>
+                        <th>Operator</th>
+                        <th>Status</th>
+                        <th>Calculated Fee</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="d : ${dockings}">
+                        <td class="fw-bold" th:text="${d.droneIdentifier}"></td>
+                        <td th:text="${d.dronePad.padCode}"></td>
+                        <td th:text="${d.operator.name}"></td>
+                        <td>
+                            <span class="badge" th:classappend="${d.status == 'LANDED' ? 'bg-warning text-dark' : 'bg-success'}" th:text="${d.status}"></span>
+                        </td>
+                        <td th:text="${d.calculatedFee != null ? '$' + d.calculatedFee : '-'}"></td>
+                        <td>
+                            <a th:if="${d.status == 'LANDED'}" th:href="@{'/dockings/depart/' + ${d.id}}" class="btn btn-sm btn-outline-danger">Depart & Bill</a>
+                            <span th:if="${d.status != 'LANDED'}" class="text-muted">Completed</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

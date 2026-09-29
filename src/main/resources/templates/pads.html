@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Landing Pad Configuration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+    <a class="navbar-brand fw-bold" href="/">🚁 Drone Port Hub</a>
+    <div class="navbar-nav">
+        <a class="nav-link" href="/">Home</a>
+        <a class="nav-link active" href="/pads">Landing Pads</a>
+        <a class="nav-link" href="/dockings">Docking & Flights</a>
+        <a class="nav-link" href="/invoices">Billing & Invoices</a>
+        <a class="nav-link" href="/reports">Financial Reports</a>
+    </div>
+</nav>
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card p-3 shadow-sm">
+                <h5 class="fw-bold">Add Landing Pad</h5>
+                <form th:action="@{/pads/save}" th:object="${newPad}" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Pad Identifier Code</label>
+                        <input type="text" class="form-control" th:field="*{padCode}" placeholder="e.g. PAD-DELTA-04" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Air Corridor Sector</label>
+                        <input type="text" class="form-control" th:field="*{airspaceSector}" placeholder="e.g. Zone 1 - Urban" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Hourly Docking Rate ($/hr)</label>
+                        <input type="number" step="0.01" class="form-control" th:field="*{hourlyRate}" placeholder="50.0" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Save Pad</button>
+                </form>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card p-3 shadow-sm">
+                <h5 class="fw-bold">Configured Vertiport Pads</h5>
+                <table class="table table-hover mt-3">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Code</th>
+                        <th>Sector</th>
+                        <th>Rate ($/hr)</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="pad : ${pads}">
+                        <td class="fw-bold" th:text="${pad.padCode}"></td>
+                        <td th:text="${pad.airspaceSector}"></td>
+                        <td th:text="'$' + ${pad.hourlyRate}"></td>
+                        <td>
+                            <span class="badge" th:classappend="${pad.status == 'AVAILABLE' ? 'bg-success' : 'bg-warning'}" th:text="${pad.status}"></span>
+                        </td>
+                        <td>
+                            <a th:href="@{'/pads/delete/' + ${pad.id}}" class="btn btn-danger btn-sm" onclick="return confirm('Delete this landing pad?')">Delete</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
